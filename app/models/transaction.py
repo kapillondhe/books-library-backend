@@ -1,10 +1,11 @@
 from datetime import datetime
 
-from sqlalchemy import DateTime, ForeignKey, Integer, String
+from sqlalchemy import DateTime, Enum as SAEnum, ForeignKey, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 
 from app.core.database import Base
+from app.models.enums import TransactionType
 
 
 class Transaction(Base):
@@ -12,7 +13,10 @@ class Transaction(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False, index=True)
-    type: Mapped[str] = mapped_column(String, nullable=False)  # ORDER / RETURN
+    type: Mapped[TransactionType] = mapped_column(
+        SAEnum(TransactionType, native_enum=False, values_callable=lambda x: [e.value for e in x]),
+        nullable=False,
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )

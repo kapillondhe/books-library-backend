@@ -1,7 +1,8 @@
-from sqlalchemy import Boolean, Integer, String, Text
+from sqlalchemy import Boolean, Enum as SAEnum, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
+from app.models.enums import ItemType
 
 
 class Item(Base):
@@ -9,11 +10,13 @@ class Item(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     title: Mapped[str] = mapped_column(String, nullable=False)
-    type: Mapped[str] = mapped_column(String, nullable=False)   # BOOK / MAGAZINE
-    genre: Mapped[str] = mapped_column(String, nullable=False)  # e.g. CRIME, FANTASY, FICTION
+    type: Mapped[ItemType] = mapped_column(
+        SAEnum(ItemType, native_enum=False, values_callable=lambda x: [e.value for e in x]),
+        nullable=False,
+    )
+    genre: Mapped[str] = mapped_column(String, nullable=False)  # free text, e.g. CRIME, FANTASY, FICTION
     author: Mapped[str] = mapped_column(String, nullable=False)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
-    image_path: Mapped[str | None] = mapped_column(String, nullable=True)  # e.g. /static/covers/clean_code.jpg
     available: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
 
     borrowings: Mapped[list["Borrowing"]] = relationship("Borrowing", back_populates="item")
