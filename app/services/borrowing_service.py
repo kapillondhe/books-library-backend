@@ -80,6 +80,17 @@ async def order_item(db: AsyncSession, user_id: int, item_id: int) -> Borrowing:
     return borrowing
 
 
+async def return_items(db: AsyncSession, user_id: int, item_ids: list[int]) -> list[dict]:
+    results = []
+    for item_id in item_ids:
+        try:
+            await return_item(db, user_id, item_id)
+            results.append({"item_id": item_id, "success": True, "message": "Item returned successfully"})
+        except HTTPException as exc:
+            results.append({"item_id": item_id, "success": False, "message": exc.detail})
+    return results
+
+
 async def return_item(db: AsyncSession, user_id: int, item_id: int) -> Borrowing:
     user = await db.get(User, user_id)
     if user is None:

@@ -12,7 +12,7 @@ class OrderRequest(BaseModel):
 
 class ReturnRequest(BaseModel):
     user_id: int
-    item_id: int
+    item_ids: list[int]
 
 
 class BorrowingRead(BaseModel):
@@ -24,3 +24,16 @@ class BorrowingRead(BaseModel):
     item: ItemRead
 
     model_config = {"from_attributes": True}
+
+
+class ReturnItemResult(BaseModel):
+    item_id: int
+    success: bool
+    message: str
+
+
+class OrderResult(BaseModel):
+    item_id: int
+    success: bool
+    message: str
+    borrowed_at: datetime
