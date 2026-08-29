@@ -22,13 +22,13 @@ class TestSubscriptionQuota:
         assert borrowing.returned_at is None
 
     async def test_order_fails_when_book_quota_exceeded(self, db_session, adult_user, silver_plan):
-        # Silver plan allows max_books=1; borrow one, then attempt a second.
-        first_item = await make_item(db_session, title="First Book")
-        await order_item(db_session, adult_user.id, first_item.id)
+        for i in range(silver_plan.max_books):
+            item = await make_item(db_session, title=f"Book {i}")
+            await order_item(db_session, adult_user.id, item.id)
 
-        second_item = await make_item(db_session, title="Second Book")
+        overflow_item = await make_item(db_session, title="Overflow Book")
         with pytest.raises(HTTPException) as exc_info:
-            await order_item(db_session, adult_user.id, second_item.id)
+            await order_item(db_session, adult_user.id, overflow_item.id)
         assert exc_info.value.status_code == 400
         assert "quota" in exc_info.value.detail.lower()
 
@@ -47,14 +47,25 @@ class TestSubscriptionQuota:
             await order_item(db_session, user.id, overflow_item.id)
         assert exc_info.value.status_code == 400
 
-    async def test_magazine_quota_is_independent_of_book_quota(self, db_session, adult_user):
+    async def test_magazine_quota_is_independent_of_book_quota(self, db_session, gold_plan):
+        user = User(email="gold-magazine@example.com", name="Gold Magazine User", age=30, subscription_id=gold_plan.id)
+        db_session.add(user)
+        await db_session.commit()
+        await db_session.refresh(user)
+
         book = await make_item(db_session, type="BOOK")
         magazine = await make_item(db_session, type="MAGAZINE", title="A Magazine")
 
-        await order_item(db_session, adult_user.id, book.id)
-        # Silver plan's book quota (1) is now exhausted, but magazine quota (1) is untouched.
-        borrowing = await order_item(db_session, adult_user.id, magazine.id)
+        await order_item(db_session, user.id, book.id)
+        borrowing = await order_item(db_session, user.id, magazine.id)
         assert borrowing.item_id == magazine.id
+
+    async def test_silver_plan_allows_no_magazines(self, db_session, adult_user):
+        magazine = await make_item(db_session, type="MAGAZINE", title="A Magazine")
+        with pytest.raises(HTTPException) as exc_info:
+            await order_item(db_session, adult_user.id, magazine.id)
+        assert exc_info.value.status_code == 400
+        assert "quota" in exc_info.value.detail.lower()
 
 
 class TestCrimeGenreAgeRestriction:

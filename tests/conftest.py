@@ -28,7 +28,7 @@ async def db_session() -> AsyncIterator[AsyncSession]:
 
 @pytest_asyncio.fixture
 async def silver_plan(db_session: AsyncSession) -> SubscriptionPlan:
-    plan = SubscriptionPlan(name="Silver", max_books=1, max_magazines=1)
+    plan = SubscriptionPlan(name="Silver", max_books=2, max_magazines=0)
     db_session.add(plan)
     await db_session.commit()
     await db_session.refresh(plan)
@@ -37,7 +37,7 @@ async def silver_plan(db_session: AsyncSession) -> SubscriptionPlan:
 
 @pytest_asyncio.fixture
 async def gold_plan(db_session: AsyncSession) -> SubscriptionPlan:
-    plan = SubscriptionPlan(name="Gold", max_books=3, max_magazines=2)
+    plan = SubscriptionPlan(name="Gold", max_books=3, max_magazines=1)
     db_session.add(plan)
     await db_session.commit()
     await db_session.refresh(plan)

@@ -9,9 +9,9 @@ from app.models.item import Item
 from app.models.plan import SubscriptionPlan
 
 PLANS = [
-    {"name": "Silver", "max_books": 1, "max_magazines": 1},
-    {"name": "Gold", "max_books": 3, "max_magazines": 2},
-    {"name": "Platinum", "max_books": 10, "max_magazines": 5},
+    {"name": "Silver", "max_books": 2, "max_magazines": 0},
+    {"name": "Gold", "max_books": 3, "max_magazines": 1},
+    {"name": "Platinum", "max_books": 4, "max_magazines": 2},
 ]
 
 ITEMS = [
