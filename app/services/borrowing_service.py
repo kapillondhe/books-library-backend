@@ -46,11 +46,16 @@ async def count_active_borrowings(db: AsyncSession, user_id: int, item_type: Ite
 
 
 async def order_item(db: AsyncSession, user_id: int, item_id: int) -> Borrowing:
-    user = await db.get(User, user_id, options=[joinedload(User.subscription_plan)])
+    user = await db.get(
+        User,
+        user_id,
+        options=[joinedload(User.subscription_plan)],
+        with_for_update=True,
+    )
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
 
-    item = await db.get(Item, item_id)
+    item = await db.get(Item, item_id, with_for_update=True)
     if item is None:
         raise HTTPException(status_code=404, detail="Item not found")
 
@@ -100,11 +105,13 @@ async def return_item(db: AsyncSession, user_id: int, item_id: int) -> Borrowing
         raise HTTPException(status_code=400, detail="Monthly transaction limit reached")
 
     result = await db.execute(
-        select(Borrowing).where(
+        select(Borrowing)
+        .where(
             Borrowing.user_id == user_id,
             Borrowing.item_id == item_id,
             Borrowing.returned_at.is_(None),
         )
+        .with_for_update()
     )
     borrowing = result.scalar_one_or_none()
     if borrowing is None:

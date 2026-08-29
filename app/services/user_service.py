@@ -14,6 +14,10 @@ async def create_user(db: AsyncSession, payload: UserCreate) -> User:
     if plan is None:
         raise HTTPException(status_code=404, detail="Subscription plan not found")
 
+    existing_user = await db.scalar(select(User).where(User.email == payload.email))
+    if existing_user is not None:
+        raise HTTPException(status_code=409, detail="Email already registered")
+
     user = User(
         email=payload.email,
         name=payload.name,
