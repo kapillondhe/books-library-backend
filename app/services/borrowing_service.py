@@ -6,14 +6,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
 from app.models.borrowing import Borrowing
-from app.models.enums import ItemType, TransactionType
+from app.models.enums import Genre, ItemType, TransactionType
 from app.models.item import Item
 from app.models.transaction import Transaction
 from app.models.user import User
 
 MONTHLY_TRANSACTION_LIMIT = 10
 CRIME_GENRE_MIN_AGE = 18
-CRIME_GENRE = "CRIME"
 
 
 async def count_monthly_transactions(db: AsyncSession, user_id: int) -> int:
@@ -65,7 +64,7 @@ async def order_item(db: AsyncSession, user_id: int, item_id: int) -> Borrowing:
     if await count_monthly_transactions(db, user_id) >= MONTHLY_TRANSACTION_LIMIT:
         raise HTTPException(status_code=400, detail="Monthly transaction limit reached")
 
-    if item.genre.upper() == CRIME_GENRE and user.age < CRIME_GENRE_MIN_AGE:
+    if item.genre == Genre.CRIME and user.age < CRIME_GENRE_MIN_AGE:
         raise HTTPException(status_code=400, detail="User does not meet the minimum age for this genre")
 
     plan = user.subscription_plan

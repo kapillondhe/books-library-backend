@@ -4,7 +4,7 @@ from sqlalchemy import Boolean, Enum as SAEnum, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
-from app.models.enums import ItemType
+from app.models.enums import Genre, ItemType
 
 if TYPE_CHECKING:
     from app.models.borrowing import Borrowing
@@ -19,7 +19,10 @@ class Item(Base):
         SAEnum(ItemType, native_enum=False, values_callable=lambda x: [e.value for e in x]),
         nullable=False,
     )
-    genre: Mapped[str] = mapped_column(String, nullable=False)  # free text, e.g. CRIME, FANTASY, FICTION
+    genre: Mapped[Genre] = mapped_column(
+        SAEnum(Genre, native_enum=False, values_callable=lambda x: [e.value for e in x]),
+        nullable=False,
+    )
     author: Mapped[str] = mapped_column(String, nullable=False)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     available: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
