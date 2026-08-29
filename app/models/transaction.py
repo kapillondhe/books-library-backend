@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import DateTime, Enum as SAEnum, ForeignKey, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -6,6 +7,9 @@ from sqlalchemy.sql import func
 
 from app.core.database import Base
 from app.models.enums import TransactionType
+
+if TYPE_CHECKING:
+    from app.models.user import User
 
 
 class Transaction(Base):

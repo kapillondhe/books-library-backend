@@ -1,8 +1,13 @@
+from typing import TYPE_CHECKING
+
 from sqlalchemy import Boolean, Enum as SAEnum, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
 from app.models.enums import ItemType
+
+if TYPE_CHECKING:
+    from app.models.borrowing import Borrowing
 
 
 class Item(Base):
