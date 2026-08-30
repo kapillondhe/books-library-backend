@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from fastapi import HTTPException
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import selectinload
 
 from app.models.borrowing import Borrowing
 from app.models.enums import Genre, ItemType, TransactionType
@@ -48,7 +48,7 @@ async def order_item(db: AsyncSession, user_id: int, item_id: int) -> Borrowing:
     user = await db.get(
         User,
         user_id,
-        options=[joinedload(User.subscription_plan)],
+        options=[selectinload(User.subscription_plan)],
         with_for_update=True,
     )
     if user is None:
